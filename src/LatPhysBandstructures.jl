@@ -36,12 +36,16 @@ using LinearAlgebra
 # Abstract type definition
 include("bond_hamiltonian/abstract_bond_hamiltonian.jl")
 
+# Concrete Hamiltonian: Sum of two Hamiltonians
+include("bond_hamiltonian/concrete_bond_hamiltonian_sum.jl")
+
 # Concrete Hamiltonian: Heisenberg
 include("bond_hamiltonian/concrete_bond_spin_hamiltonian_heisenberg.jl")
 # Concrete Hamiltonian: Kitaev
 include("bond_hamiltonian/concrete_bond_spin_hamiltonian_kitaev.jl")
-# Concrete Hamiltonian: Sum of two Hamiltonians
-include("bond_hamiltonian/concrete_bond_hamiltonian_sum.jl")
+
+# Concrete Hamiltonian: Simple Hopping Hamiltonian (NN)
+include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_simple_NN.jl")
 
 
 
