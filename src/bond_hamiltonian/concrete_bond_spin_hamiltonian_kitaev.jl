@@ -95,21 +95,21 @@ function getBondLabelsKitaevX(
     ) :: Vector{L} where {L}
 
     # all couplings that somehow contain a x
-    return filter(c->occursin('x',lowercase(string(c))), all_couplings)
+    return filter(c->occursin('x',lowercase(string(c))) || c==getDefaultLabelX(L), all_couplings)
 end
 function getBondLabelsKitaevY(
         all_couplings :: Vector{L}
     ) :: Vector{L} where {L}
 
     # all couplings that somehow contain a y
-    return filter(c->occursin('y',lowercase(string(c))), all_couplings)
+    return filter(c->occursin('y',lowercase(string(c))) || c==getDefaultLabelY(L), all_couplings)
 end
 function getBondLabelsKitaevZ(
         all_couplings :: Vector{L}
     ) :: Vector{L} where {L}
 
     # all couplings that somehow contain a z
-    return filter(c->occursin('z',lowercase(string(c))), all_couplings)
+    return filter(c->occursin('z',lowercase(string(c))) || c==getDefaultLabelZ(L), all_couplings)
 end
 
 
