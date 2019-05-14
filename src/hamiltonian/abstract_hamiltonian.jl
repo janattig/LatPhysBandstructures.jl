@@ -108,7 +108,7 @@ function matrixAtK(
         # get the bond indices
         i_from  = from(b) :: Int64
         i_to    = to(b)   :: Int64
-        delta_r = vector(unitcell(h), b)
+        delta_r = vector(b, unitcell(h))
         # get the interaction matrix and add it to the general matrix
         h_matrix[(i_from-1)*(NS)+1:(i_from)*(NS), (i_to-1)*(NS)+1:(i_to)*(NS)] .+= 0.5 .* bondterm(bondHamiltonian(h), b) .* exp(im*dot(k,delta_r))
     end

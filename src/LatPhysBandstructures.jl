@@ -51,5 +51,7 @@ include("bond_hamiltonian/concrete_bond_hamiltonian_sum.jl")
 # Abstract type definition
 include("hamiltonian/abstract_hamiltonian.jl")
 
+# Concrete type definition
+include("hamiltonian/concrete_hamiltonian.jl")
 
 end # module
