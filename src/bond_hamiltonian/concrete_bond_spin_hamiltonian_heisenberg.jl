@@ -51,7 +51,7 @@ export BondSpinHamiltonianHeisenberg
 function bondterm(
             h :: BondSpinHamiltonianHeisenberg{N,L,NS},
             b :: AbstractBond{L,NB}
-        ) :: Matrix{Complex} where {N,L,NB,NS}
+        ) :: Matrix{Complex{Float64}} where {N,L,NB,NS}
 
     # get the bond label
     l = label(b)

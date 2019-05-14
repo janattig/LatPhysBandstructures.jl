@@ -51,7 +51,7 @@ export BondHamiltonianSum
 function bondterm(
             h :: BondHamiltonianSum{L,N,H1,H2},
             b :: AbstractBond{L,NB}
-        ) :: Matrix{Complex} where {L,N,NB,H1,H2}
+        ) :: Matrix{Complex{Float64}} where {L,N,NB,H1,H2}
 
     # return the sum of the two sub-hamiltonians
     return bondterm(h.h1,b) .+ bondterm(h.h2,b)

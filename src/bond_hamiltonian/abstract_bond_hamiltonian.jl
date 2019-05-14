@@ -69,7 +69,7 @@ AbstractBondHamiltonian
 function bondterm(
             h :: AbstractBondHamiltonian{LH,NH},
             b :: AbstractBond{LB,NB}
-        ) :: Matrix{Complex} where {LB,NB,LH,NH}
+        ) :: Matrix{Complex{Float64}} where {LB,NB,LH,NH}
 
     # print an error because implementation for concrete type is missing
     error("Passed a bond with different label type to a bond Hamiltonian\nLabel type of bond: "*string(LB)*", label type of bond Hamiltonian: "*string(LH))
@@ -79,7 +79,7 @@ end
 function bondterm(
             h :: AbstractBondHamiltonian{L,NH},
             b :: AbstractBond{L,NB}
-        ) :: Matrix{Complex} where {L,NB,NH}
+        ) :: Matrix{Complex{Float64}} where {L,NB,NH}
 
     # print an error because implementation for concrete type is missing
     error("not implemented interface function 'bondterm' for bond Hamiltonian type " * string(typeof(h)))
@@ -94,7 +94,7 @@ export bondterm
     function bondterm(
             h :: AbstractBondHamiltonian{L,NH},
             b :: AbstractBond{L,NB}
-        ) :: Matrix{Complex} where {L,NB,NH}
+        ) :: Matrix{Complex{Float64}} where {L,NB,NH}
 
 The abstract bond Hamiltonian interface function. Returns a matrix with complex
 entries for a passed `AbstractBond` object `b`.
@@ -120,7 +120,7 @@ bondterm
 
 
 # fancy syntax of passing the bond to the object directly
-function (hb :: Type{H})(b :: AbstractBond{LB,NB}) :: Matrix{Complex} where {LB,NB,LH,NH,H<:AbstractBondHamiltonian{LH,NH}}
+function (hb :: Type{H})(b :: AbstractBond{LB,NB}) :: Matrix{Complex{Float64}} where {LB,NB,LH,NH,H<:AbstractBondHamiltonian{LH,NH}}
 
     # return the bond term function
     return bondterm(hb, b)

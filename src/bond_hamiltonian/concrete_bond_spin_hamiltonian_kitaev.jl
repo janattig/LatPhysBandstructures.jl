@@ -55,7 +55,7 @@ export BondSpinHamiltonianKitaev
 function bondterm(
             h :: BondSpinHamiltonianKitaev{L},
             b :: AbstractBond{L,NB}
-        ) :: Matrix{Complex} where {L,NB}
+        ) :: Matrix{Complex{Float64}} where {L,NB}
 
     # get the bond label
     l = label(b)
