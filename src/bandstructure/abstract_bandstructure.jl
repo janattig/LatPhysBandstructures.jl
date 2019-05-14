@@ -19,7 +19,7 @@
 #
 ################################################################################
 abstract type AbstractBandstructure{
-    P<:AbstractReciprocalPath{RP} where {RP}},
+    P<:AbstractReciprocalPath{RP} where {RP},
     H<:AbstractHamiltonian{L,UC,HB} where {L,UC,HB}
 } end
 

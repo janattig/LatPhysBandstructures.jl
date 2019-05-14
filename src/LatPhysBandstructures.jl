@@ -58,4 +58,15 @@ include("hamiltonian/abstract_hamiltonian.jl")
 # Concrete type definition
 include("hamiltonian/concrete_hamiltonian.jl")
 
+
+
+
+# BANDSTRUCTURE
+
+# Abstract type definition
+include("bandstructure/abstract_bandstructure.jl")
+
+# Concrete type definition
+include("bandstructure/concrete_bandstructure.jl")
+
 end # module
