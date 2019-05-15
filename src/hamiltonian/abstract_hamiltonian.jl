@@ -104,7 +104,7 @@ function matrixAtK(
     h_matrix = zeros(Complex{Float64}, dim(h),dim(h))
 
     # add all bonds to the matrix
-    for b in bonds(unitcell(h))
+    @inbounds @simd for b in bonds(unitcell(h))
         # get the bond indices
         i_from  = from(b) :: Int64
         i_to    = to(b)   :: Int64

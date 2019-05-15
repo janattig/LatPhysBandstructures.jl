@@ -107,7 +107,7 @@ function recalculate!(
     e_values = Vector{Vector{Vector{Float64}}}(undef, N_segments)
 
     # fill all k values
-    for i in 1:N_segments
+    @inbounds for i in 1:N_segments
         # fill the k values with points on the path segment
         k_values[i] = getPointsOnLine(path(bs)[i], path(bs)[i+1], seg_resolution[i])
         # fill energy values with zeros
@@ -118,7 +118,7 @@ function recalculate!(
 
 
     # calculate the energy values
-    for i in 1:N_segments
+    @inbounds for i in 1:N_segments
         for j in 1:seg_resolution[i]
             # use the k_value j of segment i
             k = k_values[i][j]
@@ -127,7 +127,7 @@ function recalculate!(
             # diagonalize the matrix and save the eigenvalues
             m_eigenvalues = sort(eigvals(m))
             # put the eigenvalues into the bands
-            for b in 1:N_bands
+            @simd for b in 1:N_bands
                 e_values[i][b][j] = m_eigenvalues[b]
             end
         end
