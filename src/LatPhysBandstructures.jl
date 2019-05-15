@@ -44,6 +44,8 @@ include("bond_hamiltonian/concrete_bond_spin_hamiltonian_heisenberg.jl")
 # Concrete Hamiltonian: Kitaev
 include("bond_hamiltonian/concrete_bond_spin_hamiltonian_kitaev.jl")
 
+# Concrete Hamiltonian: Simple Hopping Hamiltonian (independent on label of bonds)
+include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_simple.jl")
 # Concrete Hamiltonian: Simple Hopping Hamiltonian (NN)
 include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_simple_NN.jl")
 
