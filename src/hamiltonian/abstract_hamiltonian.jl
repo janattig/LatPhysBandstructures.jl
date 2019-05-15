@@ -101,7 +101,7 @@ function matrixAtK(
         ) :: Matrix{Complex{Float64}} where {L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS},H<:AbstractHamiltonian{L,UC,HB}}
 
     # new matrix
-    h_matrix = zeros(Complex{Float64}, NS*numSites(unitcell(h)),NS*numSites(unitcell(h)))
+    h_matrix = zeros(Complex{Float64}, dim(h),dim(h))
 
     # add all bonds to the matrix
     for b in bonds(unitcell(h))
@@ -119,3 +119,18 @@ end
 
 # export matrix function
 export matrixAtK
+
+
+
+
+# dimension calculation
+function dim(
+            h :: H
+        ) :: Int64 where {L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS},H<:AbstractHamiltonian{L,UC,HB}}
+
+    # return the size of the hamiltonian
+    return NS*numSites(unitcell(h))
+end
+
+# export dimension function
+export dim
