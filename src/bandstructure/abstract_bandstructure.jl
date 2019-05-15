@@ -65,6 +65,24 @@ export path
 
 
 
+# obtaining the energy values
+# bands for each segment
+# bands[i] gives all bands of segment i
+# bands[i][j] gives all energy values for band j of segment i
+# bands[i][j][k] gives the energy value at kpoint index k of band j in segment i
+function energies(
+            bs :: BS
+        ) :: Vector{<:Vector{<:Vector{<:Real}}} where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, BS <: AbstractBandstructure{P,H}}
+
+    # print an error because implementation for concrete type is missing
+    error("not implemented interface function 'energies' for bandstructure type " * string(typeof(bs)))
+end
+
+# export the function
+export energies
+
+
+
 # recalculate the band structure (energy values)
 function recalculate!(
             bs :: BS

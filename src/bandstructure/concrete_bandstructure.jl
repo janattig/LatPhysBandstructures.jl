@@ -68,6 +68,15 @@ end
 export path
 
 
+# obtaining the energy values
+function energies(
+            bs :: Bandstructure{P,H}
+        ) :: Array{Array{Array{Float64, 1}, 1}, 1} where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}}
+
+    # return the energy array
+    return bs.bands
+end
+
 
 # recalculate the band structure (energy values)
 function recalculate!(
@@ -103,7 +112,7 @@ function recalculate!(
         k_values[i] = getPointsOnLine(path(bs)[i], path(bs)[i+1], seg_resolution[i])
         # fill energy values with zeros
         e_values[i] = Vector{Float64}[
-            zeros(Float64, N_bands) for j in 1:seg_resolution[i]
+            zeros(Float64, seg_resolution[i]) for j in 1:N_bands
         ]
     end
 
@@ -116,7 +125,11 @@ function recalculate!(
             # obtain the matrix
             m = matrixAtK(hamiltonian(bs), k)
             # diagonalize the matrix and save the eigenvalues
-            e_values[i][j] .= sort(eigvals(m))
+            m_eigenvalues = sort(eigvals(m))
+            # put the eigenvalues into the bands
+            for b in 1:N_bands
+                e_values[i][b][j] = m_eigenvalues[b]
+            end
         end
     end
 
