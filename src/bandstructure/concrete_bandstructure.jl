@@ -211,3 +211,23 @@ function Bandstructure(
     # return the new object
     return bs
 end
+
+# Convinience constructor function if only unitcell and points are known
+function Bandstructure(
+            uc     :: UC,
+            points :: Symbol ...
+            ;
+            recalculate :: Bool = true
+        ) :: Bandstructure{ReciprocalPath{ReciprocalPoint{D}},Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}} where {LS,D,L,S<:AbstractSite{LS,D},N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B}}
+
+    # create a new object
+    bs = Bandstructure{ReciprocalPath{ReciprocalPoint{D}},Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}}(getReciprocalPath(uc, points...), Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}(uc, getHoppingHamiltonianSimple(uc)), Vector{Vector{Vector{Float64}}}(undef, length(points)-1))
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(bs)
+    end
+
+    # return the new object
+    return bs
+end
