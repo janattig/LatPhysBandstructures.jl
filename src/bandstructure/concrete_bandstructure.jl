@@ -13,7 +13,7 @@
 
 
 
-struct Bandstructure{P,H} <: AbstractBandstructure{P,H}
+mutable struct Bandstructure{P,H} <: AbstractBandstructure{P,H}
 
     # the path along which the band structure is calcualted
     path :: P
@@ -72,11 +72,88 @@ export path
 # recalculate the band structure (energy values)
 function recalculate!(
             bs :: Bandstructure{P,H}
-        ) where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}}
+            ;
+            resolution :: Union{Int64, Vector{Int64}} = 100
+        ) where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}}
 
-    # print an error because implementation for concrete type is missing
-    error("not implemented interface function 'recalculate!' yet for bandstructure type " * string(typeof(bs)))
+    # calculate the number of segments
+    N_segments = length(path(bs)) - 1
+    # parse the segment resolution
+    seg_resolution = (zeros(Int64,N_segments).+1).*resolution
+    if typeof(resolution)==Vector{Int64}
+        if length(resolution) == N_segments
+            seg_resolution = resolution
+        else
+            error("given resolution \"$(resolution)\" has not enough components ($(N_segments) needed)")
+        end
+    end
+
+    # calculate number of bands
+    N_bands = dim(hamiltonian(bs))
+
+
+    # make a list of all k values
+    k_values = Vector{Vector{Vector{Float64}}}(undef, N_segments)
+    # make a list for all energy values
+    e_values = Vector{Vector{Vector{Float64}}}(undef, N_segments)
+
+    # fill all k values
+    for i in 1:N_segments
+        # fill the k values with points on the path segment
+        k_values[i] = getPointsOnLine(path(bs)[i], path(bs)[i+1], seg_resolution[i])
+        # fill energy values with zeros
+        e_values[i] = Vector{Float64}[
+            zeros(Float64, N_bands) for j in 1:seg_resolution[i]
+        ]
+    end
+
+
+    # calculate the energy values
+    for i in 1:N_segments
+        for j in 1:seg_resolution[i]
+            # use the k_value j of segment i
+            k = k_values[i][j]
+            # obtain the matrix
+            m = matrixAtK(hamiltonian(bs), k)
+            # diagonalize the matrix and save the eigenvalues
+            e_values[i][j] .= sort(eigvals(m))
+        end
+    end
+
+    # set the energy values within band structure
+    bs.bands = e_values
+
+    # return nothing
+    return nothing
 end
 
 # export the function
 export recalculate!
+
+
+
+
+
+
+
+
+
+# Convinience constructor function
+function Bandstructure(
+            path :: P,
+            h    :: H
+            ;
+            recalculate :: Bool = true
+        ) :: Bandstructure{P,H} where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}}
+
+    # create a new object
+    bs = Bandstructure{P,H}(path, h, Vector{Vector{Vector{Float64}}}(undef, length(path)-1))
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(bs)
+    end
+
+    # return the new object
+    return bs
+end

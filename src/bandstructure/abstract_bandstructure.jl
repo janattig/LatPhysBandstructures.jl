@@ -68,6 +68,8 @@ export path
 # recalculate the band structure (energy values)
 function recalculate!(
             bs :: BS
+            ;
+            resolution :: Union{Int64, Vector{Int64}} = 100
         ) where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, BS <: AbstractBandstructure{P,H}}
 
     # print an error because implementation for concrete type is missing
