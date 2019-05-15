@@ -51,16 +51,16 @@ export BondHoppingHamiltonianSimpleNN
 function bondterm(
             h :: BondHoppingHamiltonianSimpleNN{L},
             b :: AbstractBond{L,NB}
-        ) :: Matrix{Complex{Float64}} where {N,L,NB,NS}
+        ) :: Float64 where {N,L,NB,NS}
 
     # get the bond label
     l = label(b)
 
     # check if it is the NN label
     if l == h.label
-        return zeros(Complex{Float64},1,1) .+ h.coupling
+        return h.coupling
     else
-        return zeros(Complex{Float64},1,1)
+        return 0.0
     end
 end
 

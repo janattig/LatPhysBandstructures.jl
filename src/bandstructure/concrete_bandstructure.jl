@@ -170,3 +170,24 @@ function Bandstructure(
     # return the new object
     return bs
 end
+
+# Convinience constructor function if the bond hamiltonian is known (uses concrete Hamiltonian)
+function Bandstructure(
+            uc   :: UC,
+            path :: P,
+            h    :: HB
+            ;
+            recalculate :: Bool = true
+        ) :: Bandstructure{P,Hamiltonian{L,UC,HB}} where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS}}
+
+    # create a new object
+    bs = Bandstructure{P,Hamiltonian{L,UC,HB}}(path, Hamiltonian{L,UC,HB}(uc, h), Vector{Vector{Vector{Float64}}}(undef, length(path)-1))
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(bs)
+    end
+
+    # return the new object
+    return bs
+end
