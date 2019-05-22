@@ -71,4 +71,15 @@ include("bandstructure/abstract_bandstructure.jl")
 # Concrete type definition
 include("bandstructure/concrete_bandstructure.jl")
 
+
+
+
+# CONSTANT ENERGY MANIFOLD
+
+# Abstract type definition
+include("energy_manifold/abstract_energy_manifold.jl")
+
+# Concrete type definition
+include("energy_manifold/concrete_energy_manifold.jl")
+
 end # module
