@@ -100,21 +100,21 @@ function recalculate!(
 
 
     # FIND ALL K POINTS
-    for i in 1:n_points
+    @simd for i in 1:n_points
         # build starting point
         k = rand(D)
         @simd for j in 1:D
-            k[j] = k[j] * bounds_lower[j] + (1-k[j]) * bounds_upper[j]
+            @inbounds k[j] = k[j] * bounds_lower[j] + (1-k[j]) * bounds_upper[j]
         end
         # find the k value
-        k_values[i] = findKAtEnergy(h, energy_cut, k)
+        @inbounds k_values[i] = findKAtEnergy(h, energy_cut, k)
     end
 
     # if refolding is enabled, refold all points
     if refold_to_first_BZ
         ruc = getReciprocalUnitcell(uc)
-        for i in 1:n_points
-            shiftToFirstBZ!(ruc, k_values[i])
+        @simd for i in 1:n_points
+            @inbounds shiftToFirstBZ!(ruc, k_values[i])
         end
     end
 

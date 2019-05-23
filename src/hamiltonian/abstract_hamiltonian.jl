@@ -138,9 +138,9 @@ function findKAtEnergy(
 
     # search until there are enough points
     for __try__ in 1:max_errors
-
         # assume k to be k_start
         k = k_start
+        H_eps = zeros(D)
         # start with the initial energy
         evs = eigvals(matrixAtK(h,k))
         e0  = minimum(abs.(evs.-energy_cut))
@@ -154,12 +154,11 @@ function findKAtEnergy(
             # the current energy
             H_0 = e0
             # the energy when going along primary directions
-            H_eps = zeros(D)
-            for j in 1:D
+            @simd for j in 1:D
                 k_grad = deepcopy(k)
-                k_grad[j] += diff_step_size_k
+                @inbounds k_grad[j] += diff_step_size_k
                 evs = eigvals(matrixAtK(h,k_grad))
-                H_eps[j] = minimum(abs.(evs.-energy_cut))
+                @inbounds H_eps[j] = minimum(abs.(evs.-energy_cut))
             end
             # the gradient of the energy
             dH = (H_eps .- H_0) ./ diff_step_size_k
@@ -167,7 +166,6 @@ function findKAtEnergy(
             dHdH = dot(dH, dH)
             # break the Newton loop if the gradient diverges or is flattened too much
             if abs(dHdH) < 1e-20 || abs(dHdH) > 1e20
-                errors_total += 1
                 break
             end
             # increment k
