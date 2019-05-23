@@ -122,6 +122,70 @@ export matrixAtK
 
 
 
+# function to find a k where a certain energy is hit
+function findKAtEnergy(
+            h :: H,
+            energy_cut :: Real,
+            k_start :: Vector{<:Real}
+            ;
+            bounds_lower :: Vector{<:Real} = ones(10) .* -2 .*pi,
+            bounds_upper :: Vector{<:Real} = ones(10) .*  2 .*pi,
+            max_errors :: Integer = 1000,
+            max_steps  :: Integer = 100,
+            precision_energy :: Real = 1e-6,
+            diff_step_size_k :: Real = 1e-6,
+        ) :: Vector{Float64} where {L,LS,D,S<:AbstractSite{LS,D},N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS},H<:AbstractHamiltonian{L,UC,HB}}
+
+    # search until there are enough points
+    for __try__ in 1:max_errors
+
+        # assume k to be k_start
+        k = k_start
+        # start with the initial energy
+        evs = eigvals(matrixAtK(h,k))
+        e0  = minimum(abs.(evs.-energy_cut))
+        # iterate i over 100 newton steps (maximum)
+        for i in 1:max_steps
+            # check if the energy is already converged
+            if e0 < precision_energy
+                # just return the k vector
+                return k
+            end
+            # the current energy
+            H_0 = e0
+            # the energy when going along primary directions
+            H_eps = zeros(D)
+            for j in 1:D
+                k_grad = deepcopy(k)
+                k_grad[j] += diff_step_size_k
+                evs = eigvals(matrixAtK(h,k_grad))
+                H_eps[j] = minimum(abs.(evs.-energy_cut))
+            end
+            # the gradient of the energy
+            dH = (H_eps .- H_0) ./ diff_step_size_k
+            # absolute value of the gradient
+            dHdH = dot(dH, dH)
+            # break the Newton loop if the gradient diverges or is flattened too much
+            if abs(dHdH) < 1e-20 || abs(dHdH) > 1e20
+                errors_total += 1
+                break
+            end
+            # increment k
+            dk = dH .* (H_0 / dHdH)
+            k .-= dk
+            # calculate a new energy
+            evs = eigvals(matrixAtK(h,k))
+            e0  = minimum(abs.(evs.-energy_cut))
+        end
+    end
+
+    # raise error
+    error("Too many errors occured consecutively without finding points --> maybe no points with energy = $(energy_cut)?")
+end
+
+# export finding function
+export findKAtEnergy
+
 
 # dimension calculation
 function dim(
