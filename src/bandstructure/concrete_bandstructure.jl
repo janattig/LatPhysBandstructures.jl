@@ -151,8 +151,8 @@ export recalculate!
 
 
 
-# Convinience constructor function if path and hamiltonian are known
-function Bandstructure(
+# Convinience function if path and hamiltonian are known
+function getBandstructure(
             path :: P,
             h    :: H
             ;
@@ -171,8 +171,8 @@ function Bandstructure(
     return bs
 end
 
-# Convinience constructor function if only path, unitcell and the bond hamiltonian is known (uses concrete Hamiltonian)
-function Bandstructure(
+# Convinience function if only path, unitcell and the bond hamiltonian is known (uses concrete Hamiltonian)
+function getBandstructure(
             uc   :: UC,
             path :: P,
             h    :: HB
@@ -192,8 +192,8 @@ function Bandstructure(
     return bs
 end
 
-# Convinience constructor function if only path and unitcell but not even the bond hamiltonian is known (uses concrete Hamiltonian and simple hopping hamiltonian)
-function Bandstructure(
+# Convinience function if only path and unitcell but not even the bond hamiltonian is known (uses concrete Hamiltonian and simple hopping hamiltonian)
+function getBandstructure(
             uc   :: UC,
             path :: P
             ;
@@ -212,10 +212,10 @@ function Bandstructure(
     return bs
 end
 
-# Convinience constructor function if only unitcell and points are known
-function Bandstructure(
+# Convinience function if only unitcell and points are known
+function getBandstructure(
             uc     :: UC,
-            points :: Symbol ...
+            points :: Union{Symbol, Tuple{Symbol, Int64}} ...
             ;
             recalculate :: Bool = true
         ) :: Bandstructure{ReciprocalPath{ReciprocalPoint{D}},Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}} where {LS,D,L,S<:AbstractSite{LS,D},N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B}}
@@ -231,3 +231,6 @@ function Bandstructure(
     # return the new object
     return bs
 end
+
+# export the convenience function
+export getBandstructure
