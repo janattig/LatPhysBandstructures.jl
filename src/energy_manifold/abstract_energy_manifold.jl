@@ -78,7 +78,7 @@ export energy
 
 
 # obtaining the energy at which the manifold cuts
-function numPoints(
+function numKPoints(
             aem :: AEM
         ) :: Float64 where {L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, AEM <: AbstractEnergyManifold{H}}
 
@@ -87,7 +87,7 @@ function numPoints(
 end
 
 # export the function
-export numPoints
+export numKPoints
 
 
 # recalculate the energy manifold (k points)
