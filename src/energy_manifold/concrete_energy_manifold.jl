@@ -53,9 +53,6 @@ function hamiltonian(
     return em.h
 end
 
-
-
-
 # obtaining the k points of the manifold
 function kpoints(
             em :: EnergyManifold{H}
@@ -64,8 +61,6 @@ function kpoints(
     # return the internal field
     return em.k_points
 end
-
-
 
 # obtaining the energy at which the manifold cuts
 function energy(
@@ -189,3 +184,74 @@ function recalculate!(
     # return nothing
     return nothing
 end
+
+
+
+
+# convenience function for obtaining the manifold
+function getEnergyManifold(
+            h     :: H,
+            e_cut :: Real,
+            n     :: Int64 = 1000
+            ;
+            recalculate :: Bool = true
+        ) :: EnergyManifold{H} where {L,LS,D,S<:AbstractSite{LS,D},B,UC<:AbstractUnitcell{S,B},HB,H<:AbstractHamiltonian{L,UC,HB}}
+
+    # create a new object
+    em = EnergyManifold{H}(h, e_cut, Vector{Float64}[])
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(em, n)
+    end
+
+    # return the new object
+    return em
+end
+
+# Convinience function if only unitcell and the bond hamiltonian is known (uses concrete Hamiltonian)
+function getEnergyManifold(
+        uc    :: UC,
+        hb    :: HB,
+        e_cut :: Real,
+        n     :: Int64 = 1000
+        ;
+        recalculate :: Bool = true
+    ) :: EnergyManifold{Hamiltonian{L,UC,HB}} where {L,N,LS,D,S<:AbstractSite{LS,D},B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS}}
+
+    # create a new object
+    em = EnergyManifold{Hamiltonian{L,UC,HB}}(Hamiltonian(uc,hb), e_cut, Vector{Float64}[])
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(em, n)
+    end
+
+    # return the new object
+    return em
+end
+
+# Convinience function if only path and unitcell but not even the bond hamiltonian is known (uses concrete Hamiltonian and simple hopping hamiltonian)
+function getEnergyManifold(
+            uc    :: UC,
+            e_cut :: Real,
+            n     :: Int64 = 1000
+            ;
+            recalculate :: Bool = true
+        ) :: EnergyManifold{Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}} where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B}}
+
+    # create a new object
+    em = EnergyManifold{Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}}(Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}(uc, getHoppingHamiltonianSimple(uc)), e_cut, Vector{Float64}[])
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(em, n)
+    end
+
+    # return the new object
+    return em
+end
+
+
+# export the convenience function
+export getEnergyManifold
