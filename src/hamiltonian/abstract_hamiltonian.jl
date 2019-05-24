@@ -128,9 +128,8 @@ function findKAtEnergy(
             energy_cut :: Real,
             k_start :: Vector{<:Real}
             ;
-            bounds_lower :: Vector{<:Real} = ones(10) .* -2 .*pi,
-            bounds_upper :: Vector{<:Real} = ones(10) .*  2 .*pi,
-            max_errors :: Integer = 1000,
+            max_variation ::Real = 2*pi,
+            max_errors :: Integer = 100,
             max_steps  :: Integer = 100,
             precision_energy :: Real = 1e-6,
             diff_step_size_k :: Real = 1e-6,
@@ -139,15 +138,17 @@ function findKAtEnergy(
     # search until there are enough points
     for __try__ in 1:max_errors
         # assume k to be k_start
-        k = k_start
+        k = k_start .+ Float64[2*(rand()-0.5)*max_variation*__try__/max_errors for i in 1:length(k_start)]
         H_eps = zeros(D)
+        evs = zeros(dim(h))
         # start with the initial energy
-        evs = eigvals(matrixAtK(h,k))
+        evs .= eigvals(matrixAtK(h,k))
         e0  = minimum(abs.(evs.-energy_cut))
         # iterate i over 100 newton steps (maximum)
         for i in 1:max_steps
             # check if the energy is already converged
             if e0 < precision_energy
+                #println("$(__try__-1) failed attempts, $(i) steps needed in attempt $(__try__)")
                 # just return the k vector
                 return k
             end
@@ -157,7 +158,7 @@ function findKAtEnergy(
             @simd for j in 1:D
                 k_grad = deepcopy(k)
                 @inbounds k_grad[j] += diff_step_size_k
-                evs = eigvals(matrixAtK(h,k_grad))
+                evs .= eigvals(matrixAtK(h,k_grad))
                 @inbounds H_eps[j] = minimum(abs.(evs.-energy_cut))
             end
             # the gradient of the energy
@@ -172,7 +173,7 @@ function findKAtEnergy(
             dk = dH .* (H_0 / dHdH)
             k .-= dk
             # calculate a new energy
-            evs = eigvals(matrixAtK(h,k))
+            evs .= eigvals(matrixAtK(h,k))
             e0  = minimum(abs.(evs.-energy_cut))
         end
     end

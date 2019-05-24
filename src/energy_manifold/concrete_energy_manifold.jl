@@ -107,7 +107,16 @@ function recalculate!(
             @inbounds k[j] = k[j] * bounds_lower[j] + (1-k[j]) * bounds_upper[j]
         end
         # find the k value
-        @inbounds k_values[i] = findKAtEnergy(h, energy_cut, k)
+        @inbounds k_values[i] = findKAtEnergy(
+                                    h,
+                                    energy_cut,
+                                    k,
+                                    max_variation = 1.0,
+                                    max_errors = max_errors,
+                                    max_steps = max_steps,
+                                    precision_energy = precision_energy,
+                                    diff_step_size_k = diff_step_size_k
+                                )
     end
 
     # if refolding is enabled, refold all points
