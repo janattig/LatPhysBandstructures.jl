@@ -83,53 +83,32 @@ function getBondLabelsHeisenberg(
         all_couplings :: Vector{L}
     ) :: Vector{L} where {L}
 
-    # all couplings are nearest neighbors
-    return all_couplings
+    # all couplings that either have 1 or no number in them
+    string_couplings = string.(all_couplings)
+    relevant = Bool[false for s in string_couplings]
+    for i in 1:length(relevant)
+        relevant[i] = occursin("1",string_couplings[i]) || sum([isdigit(c) for c in string_couplings[i]])::Int64==0
+    end
+    # return only the relevant couplings
+    return L[all_couplings[i] for i in 1:length(all_couplings) if relevant[i]]
 end
 function getBondLabelsHeisenberg(
         N :: Val{NB},
         all_couplings :: Vector{L}
     ) :: Vector{L} where {NB,L}
 
-    # no couplings are further neighbors
-    return L[]
-end
-
-# LABEL TYPE String
-function getBondLabelsHeisenberg(
-        N :: Val{1},
-        all_couplings :: Vector{S}
-    ) :: Vector{S} where {S<:AbstractString}
-
     # all couplings that either have 1 or no number in them
-    return filter(s->occursin('1',s) || sum([isdigit(c) for c in s])::Int64==0, all_couplings)
-end
-function getBondLabelsHeisenberg(
-        N :: Val{NB},
-        all_couplings :: Vector{S}
-    ) :: Vector{S} where {NB,S<:AbstractString}
-
-    # no couplings are further neighbors
-    return filter(s->occursin(s,string(NB)), all_couplings)
+    string_couplings = string.(all_couplings)
+    relevant = Bool[false for s in string_couplings]
+    for i in 1:length(relevant)
+        relevant[i] = occursin(string(NB),string_couplings[i])
+    end
+    # return only the relevant couplings
+    return L[all_couplings[i] for i in 1:length(all_couplings) if relevant[i]]
 end
 
-# LABEL TYPE Symbol
-function getBondLabelsHeisenberg(
-        N :: Val{1},
-        all_couplings :: Vector{S}
-    ) :: Vector{S} where {NB,S<:Symbol}
 
-    # return the string method
-    return Symbol.(getBondLabelsHeisenberg(Val(1),string.(all_couplings)))
-end
-function getBondLabelsHeisenberg(
-        N :: Val{NB},
-        all_couplings :: Vector{S}
-    ) :: Vector{S} where {NB,S<:Symbol}
 
-    # return the string method
-    return Symbol.(getBondLabelsHeisenberg(Val(NB),string.(all_couplings)))
-end
 
 
 

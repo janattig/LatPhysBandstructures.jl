@@ -125,7 +125,7 @@ function recalculate!(
             # obtain the matrix
             m = matrixAtK(hamiltonian(bs), k)
             # diagonalize the matrix and save the eigenvalues
-            m_eigenvalues = sort(eigvals(m))
+            m_eigenvalues = sort(real.(eigvals(m)))
             # put the eigenvalues into the bands
             @simd for b in 1:N_bands
                 e_values[i][b][j] = m_eigenvalues[b]

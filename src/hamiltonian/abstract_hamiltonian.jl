@@ -140,9 +140,8 @@ function findKAtEnergy(
         # assume k to be k_start
         k = k_start .+ Float64[2*(rand()-0.5)*max_variation*(__try__-1)/(max_errors-1) for i in 1:length(k_start)]
         H_eps = zeros(D)
-        evs = zeros(dim(h))
         # start with the initial energy
-        evs .= eigvals(matrixAtK(h,k))
+        evs = eigvals(matrixAtK(h,k))
         e0  = minimum(abs.(evs.-energy_cut))
         # iterate i over 100 newton steps (maximum)
         for i in 1:max_steps
@@ -158,7 +157,7 @@ function findKAtEnergy(
             @simd for j in 1:D
                 k_grad = deepcopy(k)
                 @inbounds k_grad[j] += diff_step_size_k
-                evs .= eigvals(matrixAtK(h,k_grad))
+                evs = eigvals(matrixAtK(h,k_grad))
                 @inbounds H_eps[j] = minimum(abs.(evs.-energy_cut))
             end
             # the gradient of the energy
@@ -173,7 +172,7 @@ function findKAtEnergy(
             dk = dH .* (H_0 / dHdH)
             k .-= dk
             # calculate a new energy
-            evs .= eigvals(matrixAtK(h,k))
+            evs = eigvals(matrixAtK(h,k))
             e0  = minimum(abs.(evs.-energy_cut))
         end
     end
@@ -184,6 +183,7 @@ end
 
 # export finding function
 export findKAtEnergy
+
 
 
 # dimension calculation
