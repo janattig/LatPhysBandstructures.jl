@@ -79,13 +79,12 @@ function recalculate!(
             em       :: EnergyManifold{H},
             n_points :: Integer
             ;
+            hs_mesh_resolution :: Real = 100,
             bounds_lower :: Vector{<:Real} = ones(10) .* -2 .*pi,
             bounds_upper :: Vector{<:Real} = ones(10) .*  2 .*pi,
-            max_errors :: Integer = 1000,
-            max_steps  :: Integer = 100,
+            refold_to_first_BZ :: Bool = true,
             precision_energy :: Real = 1e-6,
-            diff_step_size_k :: Real = 1e-6,
-            refold_to_first_BZ :: Bool = true
+            kwargs...
         ) where {L,LS,D,S<:AbstractSite{LS,D},B,UC<:AbstractUnitcell{S,B},HB,H<:AbstractHamiltonian{L,UC,HB}}
 
     # list of k values that contribute to the BZ
@@ -99,8 +98,28 @@ function recalculate!(
     energy_cut = energy(em)
 
 
-    # FIND ALL K POINTS
-    @simd for i in 1:n_points
+    # the current index
+    current_index = 1
+
+    # maybe build
+    if hs_mesh_resolution > 0
+        # build high symmetry mesh
+        hs_mesh = shuffle(getPointsHighSymmetryMesh(getBrillouinZone(uc), hs_mesh_resolution))
+        # check all points in the mesh
+        for k in hs_mesh
+            # check energy difference to energy cut
+            if minimum(abs.(eigvals(matrixAtK(h,k)).-energy_cut)) < precision_energy
+                k_values[current_index] = k
+                current_index += 1
+                if current_index > n_points
+                    break
+                end
+            end
+        end
+    end
+
+    # FIND ALL REMAINING K POINTS (RANDOM STARTING POINTS)
+    @simd for i in current_index:n_points
         # build starting point
         k = rand(D)
         @simd for j in 1:D
@@ -110,14 +129,13 @@ function recalculate!(
         @inbounds k_values[i] = findKAtEnergy(
                                     h,
                                     energy_cut,
-                                    k,
-                                    max_variation = 1.0,
-                                    max_errors = max_errors,
-                                    max_steps = max_steps,
+                                    k
+                                    ;
                                     precision_energy = precision_energy,
-                                    diff_step_size_k = diff_step_size_k
+                                    kwargs...
                                 )
     end
+
 
     # if refolding is enabled, refold all points
     if refold_to_first_BZ
@@ -143,7 +161,8 @@ function getEnergyManifold(
             e_cut :: Real,
             n     :: Int64 = 1000
             ;
-            recalculate :: Bool = true
+            recalculate :: Bool = true,
+            kwargs ...
         ) :: EnergyManifold{H} where {L,LS,D,S<:AbstractSite{LS,D},B,UC<:AbstractUnitcell{S,B},HB,H<:AbstractHamiltonian{L,UC,HB}}
 
     # create a new object
@@ -151,7 +170,7 @@ function getEnergyManifold(
 
     # recalculate the numerical energy values
     if recalculate
-        recalculate!(em, n)
+        recalculate!(em, n; kwargs...)
     end
 
     # return the new object
@@ -165,7 +184,8 @@ function getEnergyManifold(
         e_cut :: Real,
         n     :: Int64 = 1000
         ;
-        recalculate :: Bool = true
+        recalculate :: Bool = true,
+        kwargs ...
     ) :: EnergyManifold{Hamiltonian{L,UC,HB}} where {L,N,LS,D,S<:AbstractSite{LS,D},B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS}}
 
     # create a new object
@@ -173,7 +193,7 @@ function getEnergyManifold(
 
     # recalculate the numerical energy values
     if recalculate
-        recalculate!(em, n)
+        recalculate!(em, n; kwargs...)
     end
 
     # return the new object
@@ -186,7 +206,8 @@ function getEnergyManifold(
             e_cut :: Real,
             n     :: Int64 = 1000
             ;
-            recalculate :: Bool = true
+            recalculate :: Bool = true,
+            kwargs ...
         ) :: EnergyManifold{Hamiltonian{L,UC,BondHoppingHamiltonianSimple{L}}} where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B}}
 
     # create a new object
@@ -194,7 +215,7 @@ function getEnergyManifold(
 
     # recalculate the numerical energy values
     if recalculate
-        recalculate!(em, n)
+        recalculate!(em, n; kwargs...)
     end
 
     # return the new object

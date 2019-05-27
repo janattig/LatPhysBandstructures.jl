@@ -128,8 +128,8 @@ function findKAtEnergy(
             energy_cut :: Real,
             k_start :: Vector{<:Real}
             ;
-            max_variation ::Real = 2*pi,
-            max_errors :: Integer = 100,
+            max_variation ::Real = 20*pi,
+            max_errors :: Integer = 10,
             max_steps  :: Integer = 100,
             precision_energy :: Real = 1e-6,
             diff_step_size_k :: Real = 1e-6,
@@ -138,7 +138,7 @@ function findKAtEnergy(
     # search until there are enough points
     for __try__ in 1:max_errors
         # assume k to be k_start
-        k = k_start .+ Float64[2*(rand()-0.5)*max_variation*__try__/max_errors for i in 1:length(k_start)]
+        k = k_start .+ Float64[2*(rand()-0.5)*max_variation*(__try__-1)/(max_errors-1) for i in 1:length(k_start)]
         H_eps = zeros(D)
         evs = zeros(dim(h))
         # start with the initial energy

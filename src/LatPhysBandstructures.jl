@@ -27,6 +27,7 @@ module LatPhysBandstructures
 using LatPhysBase
 using LatPhysReciprocal
 using LinearAlgebra
+using Random
 
 
 
