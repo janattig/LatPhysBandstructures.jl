@@ -82,7 +82,10 @@ end
 function recalculate!(
             bs :: Bandstructure{P,H}
             ;
-            resolution :: Union{Int64, Vector{Int64}} = 100
+            resolution :: Union{Int64, Vector{Int64}} = 100,
+            batch_size :: Integer = -1,
+            batch_size_min :: Integer = 1,
+            batch_size_max :: Integer = 100
         ) where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}}
 
     # calculate the number of segments
@@ -116,13 +119,20 @@ function recalculate!(
         ]
     end
 
+    # the actual batch size for pmap
+    batch_size_used = 1
+    if batch_size > 0
+        batch_size_used = batch_size
+    else
+        batch_size_used=min(batch_size_min, max(batch_size_max, round(Int64, length(k_values[i])/(10*length(workers())))))
+    end
 
     # calculate the energy values
     @inbounds for i in 1:N_segments
         e_values_band = pmap(
             k -> sort(real.(eigvals(matrixAtK(hamiltonian(bs), k)))),
             k_values[i],
-            batch_size=min(1, max(100, round(Int64, length(k_values[i])/(10*length(workers())))))
+            batch_size=batch_size_used
         )
         for j in 1:seg_resolution[i]
             # put the eigenvalues into the bands
