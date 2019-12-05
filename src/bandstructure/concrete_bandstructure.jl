@@ -119,16 +119,15 @@ function recalculate!(
 
     # calculate the energy values
     @inbounds for i in 1:N_segments
+        e_values_band = pmap(
+            k -> sort(real.(eigvals(matrixAtK(hamiltonian(bs), k)))),
+            k_values[i],
+            batch_size=min(1, max(100, round(Int64, length(k_values[i])/(10*length(workers())))))
+        )
         for j in 1:seg_resolution[i]
-            # use the k_value j of segment i
-            k = k_values[i][j]
-            # obtain the matrix
-            m = matrixAtK(hamiltonian(bs), k)
-            # diagonalize the matrix and save the eigenvalues
-            m_eigenvalues = sort(real.(eigvals(m)))
             # put the eigenvalues into the bands
             @simd for b in 1:N_bands
-                e_values[i][b][j] = m_eigenvalues[b]
+                e_values[i][b][j] = e_values_band[j][b]
             end
         end
     end
