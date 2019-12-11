@@ -182,6 +182,46 @@ function getBandstructure(
     return bs
 end
 
+function getBandstructure(
+            h    :: H,
+            path :: P
+            ;
+            recalculate :: Bool = true
+        ) :: Bandstructure{P,H} where {D,RP<:AbstractReciprocalPoint{D}, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}}
+
+    # create a new object
+    bs = Bandstructure{P,H}(path, h, Vector{Vector{Vector{Float64}}}(undef, length(path)-1))
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(bs)
+    end
+
+    # return the new object
+    return bs
+end
+
+function getBandstructure(
+            h      :: H,
+            points :: Union{Symbol, Tuple{Symbol, Int64}} ...
+            ;
+            recalculate :: Bool = true
+        ) :: Bandstructure{ReciprocalPath{ReciprocalPoint{D}},H} where {LS,D,S<:AbstractSite{LS,D},B,L,UC<:AbstractUnitcell{S,B},HB,H<:AbstractHamiltonian{L,UC,HB}}
+
+    # create new path
+    path = getReciprocalPath(unitcell(h), points...)
+    # create a new object
+    bs = Bandstructure{ReciprocalPath{ReciprocalPoint{D}},H}(path, h, Vector{Vector{Vector{Float64}}}(undef, length(path)-1))
+
+    # recalculate the numerical energy values
+    if recalculate
+        recalculate!(bs)
+    end
+
+    # return the new object
+    return bs
+end
+
 # Convinience function if only path, unitcell and the bond hamiltonian is known (uses concrete Hamiltonian)
 function getBandstructure(
             uc   :: UC,

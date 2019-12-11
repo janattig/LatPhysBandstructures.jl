@@ -50,6 +50,8 @@ include("bond_hamiltonian/concrete_bond_spin_hamiltonian_kitaev.jl")
 include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_simple.jl")
 # Concrete Hamiltonian: Simple Hopping Hamiltonian (NN)
 include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_simple_NN.jl")
+# Concrete Hamiltonian: Simple Hopping Hamiltonian (NN)
+include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_dict.jl")
 
 
 
