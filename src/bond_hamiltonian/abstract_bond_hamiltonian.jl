@@ -115,13 +115,3 @@ julia> bondterm(hamiltonian, b)
 
 """
 bondterm
-
-
-
-
-# fancy syntax of passing the bond to the object directly
-function (hb :: Type{H})(b :: AbstractBond{LB,NB}) :: Matrix{Complex{Float64}} where {LB,NB,LH,NH,H<:AbstractBondHamiltonian{LH,NH}}
-
-    # return the bond term function
-    return bondterm(hb, b)
-end

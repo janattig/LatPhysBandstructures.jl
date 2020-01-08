@@ -54,6 +54,15 @@ include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_simple_NN.jl")
 include("bond_hamiltonian/concrete_bond_hopping_hamiltonian_dict.jl")
 
 
+#= generate fancy syntax of passing the bond to the object directly
+for H in Base.subtypes(AbstractBondHamiltonian)
+    function (hb::H)(b :: AbstractBond)
+        # return the bond term function
+        return bondterm(hb, b)
+    end
+end =#
+
+
 
 
 # HAMILTONIANS
