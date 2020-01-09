@@ -105,3 +105,82 @@ function getHoppingHamiltonianDict(
 end
 
 export getHoppingHamiltonianDict
+
+
+
+
+
+
+
+
+
+
+
+
+function getBondHamiltonianType(
+        ::Val{:BondHoppingHamiltonianDict}
+    )
+
+    # return the type
+    return BondHoppingHamiltonianDict
+end
+
+function saveBondHamiltonian(
+        hb :: HB,
+        fn :: AbstractString,
+        group :: AbstractString = "bond_hamiltonian"
+        ;
+        append :: Bool = false
+    ) where {L,HB<:BondHoppingHamiltonianDict{L}}
+
+    # determine the mode based on if one wants to append stuff
+    if append
+        mode = "r+"
+    else
+        mode = "w"
+    end
+
+    # open the file in mode
+    h5open(fn, mode) do file
+        # create the group in which the bonds are saved
+        group_hb = g_create(file, group)
+        # save the type identifier
+        attrs(group_hb)["type"] = "BondHoppingHamiltonianDict"
+        # save the parameters
+        attrs(group_hb)["N"]    = 1
+        attrs(group_hb)["L"]    = string(L)
+        # save the labels
+        if L <: Number
+            group_hb["labels"]  = [p[1] for p in hb.couplings]
+        else
+            group_hb["labels"]  = [string(p[1]) for p in hb.couplings]
+        end
+        # save the Float64 couplings
+        group_hb["couplings"]   = [p[2] for p in hb.couplings]
+    end
+
+    # return nothing
+    return nothing
+end
+
+function loadBondHamiltonian(
+        ::Type{HB},
+        fn :: AbstractString,
+        group :: AbstractString = "bond_hamiltonian"
+    ) where {LI,HB<:Union{BondHoppingHamiltonianDict{LI},BondHoppingHamiltonianDict}}
+
+    # read attribute data
+    attr_data = h5readattr(fn, group)
+    # determine D based on this
+    L = Meta.eval(Meta.parse(attr_data["L"]))
+    N = attr_data["N"]
+
+    # load coupling
+    couplings  = h5read(fn, group*"/couplings")
+
+    # load label
+    labels     = L.(h5read(fn, group*"/labels"))
+
+    # return the new bond hamiltonian
+    return BondHoppingHamiltonianDict{L}(Dict([(labels[i], couplings[i]) for i in 1:length(labels)]))
+end

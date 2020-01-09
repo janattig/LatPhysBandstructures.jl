@@ -88,6 +88,43 @@ export bondHamiltonian
 
 
 
+
+
+
+function saveHamiltonian(
+        h  :: H,
+        fn :: AbstractString,
+        group :: AbstractString = "hamiltonian"
+        ;
+        append :: Bool = false
+    ) where {L,UC<:AbstractUnitcell,N,HB<:AbstractBondHamiltonian{L,N}, H<:AbstractHamiltonian{L,UC,HB}}
+
+    # print an error because implementation for concrete type is missing
+    error("not implemented interface function 'saveHamiltonian' for Hamiltonian type " * string(H))
+end
+
+function loadHamiltonian(
+        ::Type{H},
+        fn :: AbstractString,
+        group :: AbstractString = "hamiltonian"
+    ) where {L,UC<:AbstractUnitcell,N,HB<:AbstractBondHamiltonian{L,N}, H<:AbstractHamiltonian{L,UC,HB}}
+
+    # print an error because implementation for concrete type is missing
+    error("not implemented interface function 'loadHamiltonian' for Hamiltonian type " * string(H))
+end
+
+export loadHamiltonian, saveHamiltonian
+
+
+
+
+
+
+
+
+
+
+
 ################################################################################
 #
 #	MATRIX CALCULATION

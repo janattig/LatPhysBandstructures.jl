@@ -96,3 +96,31 @@ end
 
 # export the function
 export recalculate!
+
+
+
+
+
+function saveBandstructure(
+        bs :: BS,
+        fn :: AbstractString,
+        group :: AbstractString = "bandstructure"
+        ;
+        append :: Bool = false
+    ) where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, BS<:AbstractBandstructure{P,H}}
+
+    # print an error because implementation for concrete type is missing
+    error("not implemented interface function 'recalculate!' for bandstructure type " * string(BS))
+end
+
+function loadBandstructure(
+        ::Type{BS},
+        fn :: AbstractString,
+        group :: AbstractString = "bandstructure"
+    ) where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, BS<:AbstractBandstructure{P,H}}
+
+    # print an error because implementation for concrete type is missing
+    error("not implemented interface function 'recalculate!' for bandstructure type " * string(BS))
+end
+
+export saveBandstructure, loadBandstructure

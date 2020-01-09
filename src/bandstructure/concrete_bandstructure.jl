@@ -78,6 +78,135 @@ function energies(
 end
 
 
+
+
+
+
+
+
+function saveBandstructure(
+        bs :: BS,
+        fn :: AbstractString,
+        group :: AbstractString = "bandstructure"
+        ;
+        append :: Bool = false
+    ) where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, BS<:Bandstructure{P,H}}
+
+    # determine the mode based on if one wants to append stuff
+    if append
+        mode = "r+"
+    else
+        mode = "w"
+    end
+
+    # group for hamiltonian
+    group_h = group*"/hamiltonian"
+    # group for path
+    group_p = group*"/path"
+    # group for energy bands
+    group_e = group*"/bands"
+
+    # open the file in mode
+    h5open(fn, mode) do file
+        # create the group in which the bonds are saved
+        group_bs = g_create(file, group)
+        # write number of segments
+        attrs(group_bs)["segments"]    = length(bs.bands)
+        # save the groups
+        attrs(group_bs)["hamiltonian"] = group_h
+        attrs(group_bs)["path"]        = group_p
+        attrs(group_bs)["bands"]       = group_e
+    end
+
+    # save hamiltonian
+    saveHamiltonian(hamiltonian(bs), fn, group_h, append=true)
+    # save reciprocal path
+    saveReciprocalPath(path(bs), fn, group_p, append=true)
+
+    # save the individual segments within the bands group
+    h5open(fn, "r+") do file
+        # create the group in which the bonds are saved
+        group_bands = g_create(file, group_e)
+        # save the individual segments
+        for si in 1:length(bs.bands)
+            s = bs.bands[si]
+            # reformat segment and save as matrix
+            #segmat = [s[j][i] for i in 1:length(s[1]) for j in 1:length(s)]
+            segmat = zeros(length(s[1]), length(s))
+            for i in 1:length(s[1])
+                for j in 1:length(s)
+                    segmat[i,j] = s[j][i]
+                end
+            end
+            # save
+            group_bands["segment_$(si)"] = segmat
+        end
+    end
+
+    # return nothing
+    return nothing
+end
+
+function loadBandstructure(
+        ::Type{BS},
+        fn :: AbstractString,
+        group :: AbstractString = "bandstructure"
+    ) where {RP, P<:AbstractReciprocalPath{RP}, L,UC,HB,H<:AbstractHamiltonian{L,UC,HB}, BS<:Union{Bandstructure, Bandstructure{P,H}}}
+
+    # read attribute data
+    attr_data = h5readattr(fn, group)
+
+    # group for hamiltonian
+    group_h = attr_data["hamiltonian"]
+    # group for path
+    group_p = attr_data["path"]
+    # group for energy bands
+    group_e = attr_data["bands"]
+
+    # load number of segments
+    segments = attr_data["segments"]
+
+    # load hamiltonian
+    h = loadHamiltonian(fn, group_h)
+    # load path
+    p = loadReciprocalPath(fn, group_p)
+
+    # load all energy bands
+    bds = Vector{Vector{Float64}}[]
+    # iterate over all expected segments
+    for s in 1:segments
+        # load segment as matrix
+        segmat = h5read(fn, group_e*"/segment_$(s)")
+        # reformat segment and push to list
+        segment = Vector{Float64}[
+            Float64[segmat[i,b] for i in 1:size(segmat,1)]
+            for b in 1:size(segmat,2)
+        ]
+        # push to the list
+        push!(bds, segment)
+    end
+
+    # return the new Bandstructure
+    bs = getBandstructure(h,p,recalculate=false)
+    bs.bands = bds
+    return bs
+end
+
+function loadBandstructure(
+        fn :: AbstractString,
+        group :: AbstractString = "bandstructure"
+    )
+
+    return loadBandstructure(Bandstructure, fn, group)
+end
+
+
+
+
+
+
+
+
 # recalculate the band structure (energy values)
 function recalculate!(
             bs :: Bandstructure{P,H}

@@ -115,3 +115,48 @@ julia> bondterm(hamiltonian, b)
 
 """
 bondterm
+
+
+
+
+
+
+
+
+
+
+
+# interface for saving and loading
+function saveBondHamiltonian(
+        hb :: HB,
+        fn :: AbstractString,
+        group :: AbstractString = "bond_hamiltonian"
+        ;
+        append :: Bool = false
+    ) where {L,N,HB<:AbstractBondHamiltonian{L,N}}
+
+    # print an error because implementation for concrete type is missing
+    error("not implemented interface function 'saveBondHamiltonian' for bond Hamiltonian type " * string(typeof(hb)))
+end
+
+# convinience function for standard type
+function loadBondHamiltonian(
+        fn :: AbstractString,
+        group :: AbstractString = "bond_hamiltonian"
+    )
+
+    # find out the type
+    T = getBondHamiltonianType(Val(Symbol(h5readattr(fn, group)["type"])))
+
+    # return the loaded bond hamiltonian
+    return loadBondHamiltonian(T, fn, group)
+end
+
+function getBondHamiltonianType(
+        ::Val{HB}
+    ) where {HB}
+
+    error("Type $(HB) could not be identified, i.e. getBondHamiltonianType(Val{:$(HB)}) is missing")
+end
+
+export saveBondHamiltonian, loadBondHamiltonian, getBondHamiltonianType

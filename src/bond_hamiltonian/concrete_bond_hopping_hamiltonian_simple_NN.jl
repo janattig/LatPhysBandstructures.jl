@@ -85,3 +85,79 @@ function getHoppingHamiltonianSimpleNN(
 end
 
 export getHoppingHamiltonianSimpleNN
+
+
+
+
+
+
+
+
+
+
+function getBondHamiltonianType(
+        ::Val{:BondHoppingHamiltonianSimpleNN}
+    )
+
+    # return the type
+    return BondHoppingHamiltonianSimpleNN
+end
+
+function saveBondHamiltonian(
+        hb :: HB,
+        fn :: AbstractString,
+        group :: AbstractString = "bond_hamiltonian"
+        ;
+        append :: Bool = false
+    ) where {L,HB<:BondHoppingHamiltonianSimpleNN{L}}
+
+    # determine the mode based on if one wants to append stuff
+    if append
+        mode = "r+"
+    else
+        mode = "w"
+    end
+
+    # open the file in mode
+    h5open(fn, mode) do file
+        # create the group in which the bonds are saved
+        group_hb = g_create(file, group)
+        # save the type identifier
+        attrs(group_hb)["type"] = "BondHoppingHamiltonianSimpleNN"
+        # save the parameters
+        attrs(group_hb)["N"]  = 1
+        attrs(group_hb)["L"]  = string(L)
+        # save the Float64 coupling
+        group_hb["coupling"]  = hb.coupling
+        if L <: Number
+            group_hb["label"] = hb.label
+        else
+            group_hb["label"] = string(hb.label)
+        end
+    end
+
+    # return nothing
+    return nothing
+end
+
+function loadBondHamiltonian(
+        ::Type{HB},
+        fn :: AbstractString,
+        group :: AbstractString = "bond_hamiltonian"
+    ) where {LI,HB<:Union{BondHoppingHamiltonianSimpleNN{LI},BondHoppingHamiltonianSimpleNN}}
+
+    # read attribute data
+    attr_data = h5readattr(fn, group)
+    # determine D based on this
+    L = Meta.eval(Meta.parse(attr_data["L"]))
+    N = attr_data["N"]
+
+    # load coupling
+    coupling  = h5read(fn, group*"/coupling")
+
+    # load label
+    label     = L(h5read(fn, group*"/label"))
+
+    # return the new bond hamiltonian
+    return BondHoppingHamiltonianSimpleNN{L}(coupling, label)
+end
