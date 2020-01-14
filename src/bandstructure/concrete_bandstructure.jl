@@ -260,7 +260,7 @@ function recalculate!(
         end
         # get the energy values
         e_values_band = pmap(
-            k -> sort(real.(eigvals(matrixAtK(hamiltonian(bs), k)))),
+            k -> sort(real.(eigvals!(Hermitian(matrixAtK(hamiltonian(bs), k))))),
             k_values[i],
             batch_size=batch_size_used
         )
