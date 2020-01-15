@@ -131,7 +131,7 @@ export loadHamiltonian, saveHamiltonian
 #
 ################################################################################
 
-# function to compute the matrix
+# function to compute the matrix for any bond term dimension
 function matrixAtK(
             h :: H,
             k :: Vector{<:Real}
@@ -148,6 +148,25 @@ function matrixAtK(
         delta_r = vector(b, unitcell(h))
         # get the interaction matrix and add it to the general matrix
         h_matrix[(i_from-1)*(NS)+1:(i_from)*(NS), (i_to-1)*(NS)+1:(i_to)*(NS)] .+= 0.5 .* bondterm(bondHamiltonian(h), b) .* exp(im*dot(k,delta_r))
+    end
+
+    # return the matrix
+    return h_matrix
+end
+
+# function to compute the matrix for bond term dimension 1
+function matrixAtK(
+            h :: H,
+            k :: Vector{<:Real}
+        ) :: Matrix{Complex{Float64}} where {L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},HB<:AbstractBondHamiltonian{L,1},H<:AbstractHamiltonian{L,UC,HB}}
+
+    # new matrix
+    h_matrix = zeros(Complex{Float64}, dim(h),dim(h))
+
+    # add all bonds to the matrix
+    @inbounds @simd for b in bonds(unitcell(h))
+        # get the interaction matrix and add it to the general matrix
+        h_matrix[from(b), to(b)] += 0.5 * bondterm(bondHamiltonian(h), b) * exp(im*dot(k, vector(b, unitcell(h))))
     end
 
     # return the matrix

@@ -53,11 +53,8 @@ function bondterm(
             b :: AbstractBond{L,NB}
         ) :: Float64 where {N,L,NB,NS}
 
-    # get the bond label
-    l = label(b)
-
     # check if it is the NN label
-    if l == h.label
+    if label(b) == h.label
         return h.coupling
     else
         return 0.0
