@@ -166,6 +166,58 @@ function matrixAtK(
     # add all bonds to the matrix
     @inbounds @simd for b in bonds(unitcell(h))
         # get the interaction matrix and add it to the general matrix
+        h_matrix[from(b), to(b)] += exp(im*dot(k, vector(b, unitcell(h)))) * 0.5 * bondterm(bondHamiltonian(h), b)
+    end
+
+    # return the matrix
+    return h_matrix
+end
+
+
+
+# function to compute the matrix for any bond term dimension into an already allocated matrix
+function matrixAtK!(
+            h :: H,
+            k :: Vector{<:Real},
+            h_matrix :: Array{Complex{Float64}, 2}
+        ) :: Matrix{Complex{Float64}} where {L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},NS,HB<:AbstractBondHamiltonian{L,NS},H<:AbstractHamiltonian{L,UC,HB}}
+
+    # check matrix
+    @assert size(h_matrix) == (dim(h),dim(h)) "Wrong matrix size passend: size(h_matrix)=$(size(h_matrix)), required=$((dim(h),dim(h)))"
+
+    # erase elements in matrix
+    h_matrix .= 0.0 + 0.0im
+
+    # add all bonds to the matrix
+    @inbounds @simd for b in bonds(unitcell(h))
+        # get the bond indices
+        i_from  = from(b) :: Int64
+        i_to    = to(b)   :: Int64
+        delta_r = vector(b, unitcell(h))
+        # get the interaction matrix and add it to the general matrix
+        h_matrix[(i_from-1)*(NS)+1:(i_from)*(NS), (i_to-1)*(NS)+1:(i_to)*(NS)] .+= 0.5 .* bondterm(bondHamiltonian(h), b) .* exp(im*dot(k,delta_r))
+    end
+
+    # return the matrix
+    return h_matrix
+end
+
+# function to compute the matrix for bond term dimension 1 into an already allocated matrix
+function matrixAtK!(
+            h :: H,
+            k :: Vector{<:Real},
+            h_matrix :: Array{Complex{Float64}, 2}
+        ) :: Matrix{Complex{Float64}} where {L,S,N,B<:AbstractBond{L,N},UC<:AbstractUnitcell{S,B},HB<:AbstractBondHamiltonian{L,1},H<:AbstractHamiltonian{L,UC,HB}}
+
+    # check matrix
+    @assert size(h_matrix) == (dim(h),dim(h)) "Wrong matrix size passend: size(h_matrix)=$(size(h_matrix)), required=$((dim(h),dim(h)))"
+
+    # erase elements in matrix
+    h_matrix .= 0.0 + 0.0im
+
+    # add all bonds to the matrix
+    @inbounds @simd for b in bonds(unitcell(h))
+        # get the interaction matrix and add it to the general matrix
         h_matrix[from(b), to(b)] += 0.5 * bondterm(bondHamiltonian(h), b) * exp(im*dot(k, vector(b, unitcell(h))))
     end
 
@@ -174,9 +226,7 @@ function matrixAtK(
 end
 
 # export matrix function
-export matrixAtK
-
-
+export matrixAtK, matrixAtK!
 
 # function to find a k where a certain energy is hit
 function findKAtEnergy(
