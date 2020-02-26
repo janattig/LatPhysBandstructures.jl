@@ -163,10 +163,17 @@ function matrixAtK(
     # new matrix
     h_matrix = zeros(Complex{Float64}, dim(h),dim(h))
 
+    # scalar products
+    k_dot_dx = zeros(Float64, length(bonds(unitcell(h))))
+    # fill in the dot products
+    @inbounds @simd for bi in 1:length(bonds(unitcell(h)))
+        k_dot_dx[bi] = vector_dot_k(bonds(unitcell(h))[bi], unitcell(h), k)
+    end
+
     # add all bonds to the matrix
-    @inbounds @simd for b in bonds(unitcell(h))
+    @inbounds @simd for bi in 1:length(bonds(unitcell(h)))
         # get the interaction matrix and add it to the general matrix
-        h_matrix[from(b), to(b)] += exp(im*dot(k, vector(b, unitcell(h)))) * 0.5 * bondterm(bondHamiltonian(h), b)
+        h_matrix[from(bonds(unitcell(h))[bi]), to(bonds(unitcell(h))[bi])] += exp(im*k_dot_dx[bi]) * 0.5 * bondterm(bondHamiltonian(h), bonds(unitcell(h))[bi])
     end
 
     # return the matrix

@@ -256,10 +256,10 @@ function recalculate!(
         if batch_size > 0
             batch_size_used = batch_size
         else
-            batch_size_used=min(batch_size_min, max(batch_size_max, round(Int64, length(k_values[i])/(10*length(workers())))))
+            batch_size_used = min(batch_size_min, max(batch_size_max, round(Int64, length(k_values[i])/(10*length(workers())))))
         end
         # get the energy values
-        e_values_band = pmap(
+        e_values_band :: Vector{Vector{Float64}} = pmap(
             k -> sort(real.(eigvals!(Hermitian(matrixAtK(hamiltonian(bs), k))))),
             k_values[i],
             batch_size=batch_size_used
